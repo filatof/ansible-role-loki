@@ -1,0 +1,61 @@
+---
+- name: Ensure loki user
+  ansible.builtin.user:
+    name: "{{ loki_user }}"
+    system: yes
+    shell: /usr/sbin/nologin
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ loki_user }}"
+    group: "{{ loki_group }}"
+  with_items:
+    - "{{ loki_config_dir }}"
+    - "{{ loki_data_dir }}"
+
+- name: Detect architecture
+  set_fact:
+    go_arch: "{{ go_arch_map[ansible_architecture] }}"
+    go_os: "{{ go_os_map[ansible_system] }}"
+
+- name: Download Loki binary
+  ansible.builtin.get_url:
+    url: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki-{{ go_os }}-{{ go_arch }}.zip"
+    dest: "/tmp/loki.zip"
+    mode: "0644"
+
+- name: Unzip Loki
+  ansible.builtin.unarchive:
+    src: "/tmp/loki.zip"
+    dest: "/tmp/"
+    remote_src: yes
+
+- name: Install Loki binary
+  ansible.builtin.copy:
+    src: "/tmp/loki-{{ go_os }}-{{ go_arch }}"
+    dest: "{{ loki_install_dir }}/loki"
+    mode: "0755"
+
+- name: Template loki config
+  ansible.builtin.template:
+    src: "loki-config.yaml.j2"
+    dest: "{{ loki_config_dir }}/loki.yaml"
+    mode: "0644"
+
+- name: Loki systemd unit
+  ansible.builtin.template:
+    src: loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    mode: "0644"
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable and start Loki
+  ansible.builtin.systemd:
+    name: loki
+    state: started
+    enabled: yes
