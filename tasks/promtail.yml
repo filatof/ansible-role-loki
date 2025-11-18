@@ -1,0 +1,58 @@
+---
+- name: Ensure promtail user
+  ansible.builtin.user:
+    name: "{{ promtail_user }}"
+    system: yes
+    shell: /usr/sbin/nologin
+
+- name: Create directory
+  ansible.builtin.file:
+    path: "{{ promtail_config_dir }}"
+    state: directory
+    owner: "{{ promtail_user }}"
+    group: "{{ promtail_group }}"
+
+- name: Detect architecture
+  set_fact:
+    go_arch: "{{ go_arch_map[ansible_architecture] }}"
+    go_os: "{{ go_os_map[ansible_system] }}"
+
+- name: Download Promtail
+  ansible.builtin.get_url:
+    url: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/promtail-{{ go_os }}-{{ go_arch }}.zip"
+    dest: "/tmp/promtail.zip"
+    mode: "0644"
+
+- name: Unzip Promtail
+  ansible.builtin.unarchive:
+    src: "/tmp/promtail.zip"
+    dest: "/tmp/"
+    remote_src: yes
+
+- name: Install promtail binary
+  ansible.builtin.copy:
+    src: "/tmp/promtail-{{ go_os }}-{{ go_arch }}"
+    dest: "{{ promtail_install_dir }}/promtail"
+    mode: "0755"
+
+- name: Template promtail config
+  ansible.builtin.template:
+    src: promtail-config.yaml.j2
+    dest: "{{ promtail_config_dir }}/promtail.yaml"
+    mode: "0644"
+
+- name: Promtail systemd unit
+  ansible.builtin.template:
+    src: promtail.service.j2
+    dest: /etc/systemd/system/promtail.service
+    mode: "0644"
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable and start Promtail
+  ansible.builtin.systemd:
+    name: promtail
+    state: started
+    enabled: yes
