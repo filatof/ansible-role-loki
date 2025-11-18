@@ -1,13 +1,33 @@
-Role Name
+Ansible role loki
 =========
 
-A brief description of the role goes here.
+Эта Ansible-роль устанавливает **Loki** и **Promtail** на целевые серверы.  
+Логи собирает Promtail, хранит и агрегирует Loki.
+
+Роль поддерживает установку:
+- **Loki** — обычно на одну ВМ (где Grafana)
+- **Promtail** — на все ВМ
+
+Управление включает:
+- выбор версии через переменные
+- скачивание бинаря под архитектуру
+- systemd unit файлы
+- шаблоны конфигурации на базе локальных конфигов Loki/Promtail
 
 Requirements
 ------------
+## Установка роли
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
-
+```bash
+ansible-galaxy install -p roles -r roles/requirements.yml
+```
+В roles/requirements.yml:
+```bash
+- src: https://github.com/filatof/loki-promtail-ansible-role.git
+  name: loki_promtail
+  scm: git
+  version: main
+```
 Role Variables
 --------------
 
@@ -30,7 +50,7 @@ Including an example of how to use your role (for instance, with variables passe
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------
