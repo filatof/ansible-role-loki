@@ -2,7 +2,7 @@
 # Defaults for Loki
 loki_version: "3.6.0"
 loki_install: false                  # ставить Loki на текущую ВМ или нет
-loki_url: "http://localhost:3100"       # URL Loki для Promtail
+loki_url: "192.168.105.12:3100"                         # URL Loki для Promtail
 loki_user: loki
 loki_group: loki
 loki_install_dir: /usr/local/bin
@@ -10,7 +10,7 @@ loki_config_dir: /etc/loki
 loki_data_dir: /var/lib/loki
 
 # Defaults for Promtail
-promtail_version: "3.2.1"
+promtail_version: "3.6.0"
 promtail_install: true               # promtail ставим на все ВМ
 promtail_user: promtail
 promtail_group: promtail

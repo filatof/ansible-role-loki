@@ -3,6 +3,8 @@ galaxy_info:
   author: fill
   description: install loki and promtail
   company: EQ
+  role_name: loki  # if absent directory name hosting role is used instead
+  namespace: fill  # if absent, author is used instead
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
