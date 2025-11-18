@@ -1,47 +1,51 @@
-{% raw %}
-# Loki local config template
-
 auth_enabled: false
 
 server:
   http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: debug
+  grpc_server_max_concurrent_streams: 1000
 
-ingester:
-  lifecycler:
-    ring:
-      kvstore:
-        store: inmemory
-      replication_factor: 1
-  chunk_idle_period: 5m
-  chunk_retain_period: 30s
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /tmp/loki
+  storage:
+    filesystem:
+      chunks_directory: /tmp/loki/chunks
+      rules_directory: /tmp/loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+limits_config:
+  metric_aggregation_enabled: true
+  enable_multi_variant_queries: true
 
 schema_config:
   configs:
     - from: 2020-10-24
-      store: boltdb-shipper
+      store: tsdb
       object_store: filesystem
-      schema: v11
+      schema: v13
       index:
         prefix: index_
         period: 24h
 
-storage_config:
-  boltdb_shipper:
-    active_index_directory: "{{ loki_data_dir }}/index"
-    cache_location: "{{ loki_data_dir }}/index_cache"
-    shared_store: filesystem
+pattern_ingester:
+  enabled: true
+  metric_aggregation:
+    loki_address: localhost:3100
 
-  filesystem:
-    directory: "{{ loki_data_dir }}/chunks"
+ruler:
+  alertmanager_url: http://localhost:9093
 
-limits_config:
-  ingestion_rate_mb: 10
-  ingestion_burst_size_mb: 20
-
-chunk_store_config:
-  max_look_back_period: 0s
-
-table_manager:
-  retention_deletes_enabled: false
-  retention_period: 0s
-{% endraw %}
+frontend:
+  encoding: protobuf

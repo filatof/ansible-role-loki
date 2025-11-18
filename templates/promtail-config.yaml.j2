@@ -1,4 +1,3 @@
-{% raw %}
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
@@ -17,4 +16,3 @@ scrape_configs:
         labels:
           job: varlogs
           __path__: /var/log/*log
-{% endraw %}
