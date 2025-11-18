@@ -1,4 +1,9 @@
 ---
+- name: Set Loki URL for Promtail if not defined
+  set_fact:
+    loki_url: "{{ hostvars[loki_host]['ansible_fqdn'] | default(hostvars[loki_host]['ansible_host']) | default('localhost') ~ ':3100' }}"
+  when: loki_url == "" and loki_host is defined
+
 - name: Ensure loki user
   ansible.builtin.user:
     name: "{{ loki_user }}"
@@ -29,7 +34,7 @@
 - name: Unzip Loki
   ansible.builtin.unarchive:
     src: "/tmp/loki.zip"
-    dest: "/tmp/"
+    dest: "/tmp"
     remote_src: yes
 
 - name: Install Loki binary
@@ -37,6 +42,7 @@
     src: "/tmp/loki-{{ go_os }}-{{ go_arch }}"
     dest: "{{ loki_install_dir }}/loki"
     mode: "0755"
+    remote_src: yes
 
 - name: Template loki config
   ansible.builtin.template:
