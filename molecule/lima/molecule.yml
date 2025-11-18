@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: molecule-lima
+  ssh_timeout: 120
+
+platforms:
+  - name: test01
+    image: "https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-arm64.img"
+    arch: aarch64
+    vm_type: vz
+    cpus: 2
+    memory: 2GiB
+    disk: 20GiB
+    python_interpreter: /usr/bin/python3
+
+  - name: test02
+    image: "https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-arm64.img"
+    arch: aarch64
+    vm_type: vz
+    cpus: 4
+    memory: 4GiB
+    disk: 20GiB
+    python_interpreter: /usr/bin/python3
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      callbacks_enabled: profile_tasks, timer
+      host_key_checking: false
+
+verifier:
+  name: ansible
