@@ -3,7 +3,9 @@
   ansible.builtin.user:
     name: "{{ promtail_user }}"
     system: yes
+    groups: adm
     shell: /usr/sbin/nologin
+    append: yes
 
 - name: Create directory
   ansible.builtin.file:
